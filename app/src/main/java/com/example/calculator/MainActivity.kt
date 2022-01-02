@@ -49,7 +49,6 @@ class MainActivity : AppCompatActivity() {
             } else if (btn == "." && !point) {
                 point = true
             }
-            Toast.makeText(this,"$point, $btn",Toast.LENGTH_SHORT).show()
             etOperations.text = etOperations.text.toString() + btn
         }
         // Numbers buttons
@@ -67,19 +66,18 @@ class MainActivity : AppCompatActivity() {
         btnPoint.setOnClickListener { printButton(btnPoint.text.toString()) }
 
         btnDel.setOnClickListener { // Deletes the lasted item
+            val itemDeleted: Char = etOperations.text.toString().last()
+            Toast.makeText(this,"item deleted: $itemDeleted",Toast.LENGTH_SHORT).show()
+            when (itemDeleted) {
+                '.' -> point = false
+                '+' -> "hell"
+            }
             if (!etOperations.text.equals("0")) {
                 etOperations.text = etOperations.text.substring(0 until etOperations.text.length - 1)
             }
             if (etOperations.text.isEmpty()) {
                 etOperations.text = "0"
             }
-            val itemDeleted: String = etOperations.text.substring(etOperations.text.length - 1 until etOperations.text.length)
-            Log.d("myTag",itemDeleted)
-            Toast.makeText(this,"item deleted: $itemDeleted",Toast.LENGTH_SHORT).show()
-            if (itemDeleted == ".") {
-                point = false
-            }
-            Toast.makeText(this,point.toString(),Toast.LENGTH_SHORT).show()
         }
         btnDel.setOnLongClickListener { // Deletes all items
             etOperations.text = "0"

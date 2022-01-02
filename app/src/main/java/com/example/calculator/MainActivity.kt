@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.text.isDigitsOnly
 
 class MainActivity : AppCompatActivity() {
@@ -59,9 +60,23 @@ class MainActivity : AppCompatActivity() {
             }
             return symbol
         }
+        fun isDouble(number: String): Boolean {
+            if (number.isEmpty()) {
+                return false
+            } else {
+                return number.toDouble() % 1 != 0.0
+            }
+        }
         fun checkPoint(operations: String) {
             if (hasSymbols(operations)) {
-
+                var number: String = ""
+                for (item in operations.reversed()) {
+                    when (item) {
+                        '0','1','2','3','4','5','6','7','8','9','.' -> number += item.toString()
+                        '+','-','×','÷' -> break
+                    }
+                }
+                point = isDouble(number.reversed())
             }
         }
         // Numbers buttons
@@ -81,7 +96,7 @@ class MainActivity : AppCompatActivity() {
         btnDel.setOnClickListener { // Deletes the lasted item
             when (etOperations.text.toString().last()) { // Compares item deleted
                 '.' -> point = false
-                '+', '-', '×', '÷' -> checkPoint(etOperations.text.toString())
+                '+', '-', '×', '÷' -> checkPoint(etOperations.text.substring(0 until etOperations.text.length - 1))
             }
             if (!etOperations.text.equals("0")) {
                 etOperations.text = etOperations.text.substring(0 until etOperations.text.length - 1)

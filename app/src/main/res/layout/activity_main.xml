@@ -249,7 +249,7 @@
                 android:stateListAnimator="@null"/>
 
             <Button
-                android:id="@+id/btnSubstract"
+                android:id="@+id/btnMinus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

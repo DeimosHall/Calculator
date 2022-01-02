@@ -2,10 +2,9 @@ package com.example.calculator
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
+import androidx.core.text.isDigitsOnly
 
 class MainActivity : AppCompatActivity() {
 
@@ -23,7 +22,7 @@ class MainActivity : AppCompatActivity() {
         val btnDel = findViewById<Button>(R.id.btnDel)
         val btnDivide = findViewById<Button>(R.id.btnDivide)
         val btnMulti = findViewById<Button>(R.id.btnMulti)
-        val btnSubstract = findViewById<Button>(R.id.btnSubstract)
+        val btnMinus = findViewById<Button>(R.id.btnMinus)
         val btnPlus = findViewById<Button>(R.id.btnPlus)
         val btnEquals = findViewById<Button>(R.id.btnEquals)
         val btnPoint = findViewById<Button>(R.id.btnPoint)
@@ -40,16 +39,30 @@ class MainActivity : AppCompatActivity() {
         val btn9 = findViewById<Button>(R.id.btn9)
 
         fun printButton(x: String) {
-            var btn = x
-            if (etOperations.text.equals("0") && btn != "." && btn != "+" && btn != "-" && btn != "÷" && btn != "×") { // Avoids multiple 0
-                etOperations.text = ""
+            var input: String = x // This is needed because it can be changed, x is a constant
+            val operations: String = etOperations.text.toString()
+            when {
+                operations == "0" && input.isDigitsOnly() -> etOperations.text = "" // Avoids multiple 0
+                input == "." && point -> input = "" // Avoids multiple points
+                input == "." && !point -> point = true
+                input == "+" || input == "-" || input == "×" || input == "÷" -> point = false
             }
-            if (btn == "." && point) { // Avoids multiple points
-                btn = ""
-            } else if (btn == "." && !point) {
-                point = true
+            etOperations.text = etOperations.text.toString() + input
+        }
+        fun hasSymbols(x: String): Boolean {
+            var symbol = false
+            for (item in x) {
+                if (item == '+' || item == '-' || item == '×' || item == '÷') {
+                    symbol = true
+                    break
+                }
             }
-            etOperations.text = etOperations.text.toString() + btn
+            return symbol
+        }
+        fun checkPoint(operations: String) {
+            if (hasSymbols(operations)) {
+
+            }
         }
         // Numbers buttons
         btn0.setOnClickListener { printButton(btn0.text.toString()) }
@@ -66,11 +79,9 @@ class MainActivity : AppCompatActivity() {
         btnPoint.setOnClickListener { printButton(btnPoint.text.toString()) }
 
         btnDel.setOnClickListener { // Deletes the lasted item
-            val itemDeleted: Char = etOperations.text.toString().last()
-            Toast.makeText(this,"item deleted: $itemDeleted",Toast.LENGTH_SHORT).show()
-            when (itemDeleted) {
+            when (etOperations.text.toString().last()) { // Compares item deleted
                 '.' -> point = false
-                '+' -> "hell"
+                '+', '-', '×', '÷' -> checkPoint(etOperations.text.toString())
             }
             if (!etOperations.text.equals("0")) {
                 etOperations.text = etOperations.text.substring(0 until etOperations.text.length - 1)
@@ -85,5 +96,9 @@ class MainActivity : AppCompatActivity() {
             point = false
             true
         }
+        btnPlus.setOnClickListener { printButton(btnPlus.text.toString()) }
+        btnMinus.setOnClickListener { printButton(btnMinus.text.toString()) }
+        btnMulti.setOnClickListener { printButton(btnMulti.text.toString()) }
+        btnDivide.setOnClickListener { printButton(btnDivide.text.toString()) }
     }
 }

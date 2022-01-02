@@ -23,7 +23,8 @@
             android:gravity="right|center_vertical"
             android:paddingRight="30dp"
             android:paddingLeft="30dp"
-            android:textSize="40sp"
+            android:textSize="45sp"
+            android:text="0"
             tools:text="60+2" />
 
         <TextView
@@ -212,7 +213,7 @@
             android:background="@color/teal_200">
 
             <Button
-                android:id="@+id/btnDEL"
+                android:id="@+id/btnDel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

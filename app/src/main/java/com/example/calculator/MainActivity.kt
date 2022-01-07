@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.text.isDigitsOnly
 
 class MainActivity : AppCompatActivity() {
@@ -37,15 +38,19 @@ class MainActivity : AppCompatActivity() {
         val btn8 = findViewById<Button>(R.id.btn8)
         val btn9 = findViewById<Button>(R.id.btn9)
 
-        fun printButton(x: String) {
+        fun printItem(x: String) {
             var input: String = x // This is needed because it can be changed, x is a constant
             val operations: String = etOperations.text.toString()
             val lastItem = etOperations.text.toString().last()
+            Toast.makeText(this,lastItem.toString(),Toast.LENGTH_SHORT).show()
             when {
                 operations == "0" && input.isDigitsOnly() -> etOperations.text = "" // Avoids multiple 0
                 input == "." && pointEntered -> input = "" // Avoids multiple points
                 input == "." && !pointEntered -> pointEntered = true // Allows to enter point again
-                input == "+" || input == "-" || input == "×" || input == "÷" -> if (lastItem == '.') input = "" else pointEntered = false
+                input == "+" || input == "-" || input == "×" || input == "÷" -> {
+                    if (lastItem == '.') input = "" else pointEntered = false
+                    if (lastItem == '+' || lastItem == '-' || lastItem == '×' || lastItem == '÷') input = ""
+                }
             }
             etOperations.text = etOperations.text.toString() + input
         }
@@ -83,18 +88,18 @@ class MainActivity : AppCompatActivity() {
             }
         }
         // Numbers buttons
-        btn0.setOnClickListener { printButton(btn0.text.toString()) }
-        btn1.setOnClickListener { printButton(btn1.text.toString()) }
-        btn2.setOnClickListener { printButton(btn2.text.toString()) }
-        btn3.setOnClickListener { printButton(btn3.text.toString()) }
-        btn4.setOnClickListener { printButton(btn4.text.toString()) }
-        btn5.setOnClickListener { printButton(btn5.text.toString()) }
-        btn6.setOnClickListener { printButton(btn6.text.toString()) }
-        btn7.setOnClickListener { printButton(btn7.text.toString()) }
-        btn8.setOnClickListener { printButton(btn8.text.toString()) }
-        btn9.setOnClickListener { printButton(btn9.text.toString()) }
+        btn0.setOnClickListener { printItem(btn0.text.toString()) }
+        btn1.setOnClickListener { printItem(btn1.text.toString()) }
+        btn2.setOnClickListener { printItem(btn2.text.toString()) }
+        btn3.setOnClickListener { printItem(btn3.text.toString()) }
+        btn4.setOnClickListener { printItem(btn4.text.toString()) }
+        btn5.setOnClickListener { printItem(btn5.text.toString()) }
+        btn6.setOnClickListener { printItem(btn6.text.toString()) }
+        btn7.setOnClickListener { printItem(btn7.text.toString()) }
+        btn8.setOnClickListener { printItem(btn8.text.toString()) }
+        btn9.setOnClickListener { printItem(btn9.text.toString()) }
         // Action buttons
-        btnPoint.setOnClickListener { printButton(btnPoint.text.toString()) }
+        btnPoint.setOnClickListener { printItem(btnPoint.text.toString()) }
 
         btnDel.setOnClickListener { // Deletes the lasted item
             when (etOperations.text.toString().last()) { // Compares item deleted
@@ -114,9 +119,9 @@ class MainActivity : AppCompatActivity() {
             pointEntered = false
             true
         }
-        btnPlus.setOnClickListener { printButton(btnPlus.text.toString()) }
-        btnMinus.setOnClickListener { printButton(btnMinus.text.toString()) }
-        btnMulti.setOnClickListener { printButton(btnMulti.text.toString()) }
-        btnDivide.setOnClickListener { printButton(btnDivide.text.toString()) }
+        btnPlus.setOnClickListener { printItem(btnPlus.text.toString()) }
+        btnMinus.setOnClickListener { printItem(btnMinus.text.toString()) }
+        btnMulti.setOnClickListener { printItem(btnMulti.text.toString()) }
+        btnDivide.setOnClickListener { printItem(btnDivide.text.toString()) }
     }
 }

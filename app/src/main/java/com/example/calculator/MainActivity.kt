@@ -4,7 +4,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.text.isDigitsOnly
 
 class MainActivity : AppCompatActivity() {
@@ -13,12 +12,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        var point = false
+        var pointEntered = false
         var number1: Double
         var number2: Double
-        var x: String
 
-        val etOperations: TextView = findViewById<TextView>(R.id.etOperations)
+        val etOperations = findViewById<TextView>(R.id.etOperations)
         val etResult = findViewById<TextView>(R.id.etResult)
         val btnDel = findViewById<Button>(R.id.btnDel)
         val btnDivide = findViewById<Button>(R.id.btnDivide)
@@ -42,11 +40,12 @@ class MainActivity : AppCompatActivity() {
         fun printButton(x: String) {
             var input: String = x // This is needed because it can be changed, x is a constant
             val operations: String = etOperations.text.toString()
+            val lastItem = etOperations.text.toString().last()
             when {
                 operations == "0" && input.isDigitsOnly() -> etOperations.text = "" // Avoids multiple 0
-                input == "." && point -> input = "" // Avoids multiple points
-                input == "." && !point -> point = true
-                input == "+" || input == "-" || input == "×" || input == "÷" -> point = false
+                input == "." && pointEntered -> input = "" // Avoids multiple points
+                input == "." && !pointEntered -> pointEntered = true // Allows to enter point again
+                input == "+" || input == "-" || input == "×" || input == "÷" -> if (lastItem == '.') input = "" else pointEntered = false
             }
             etOperations.text = etOperations.text.toString() + input
         }
@@ -60,23 +59,27 @@ class MainActivity : AppCompatActivity() {
             }
             return symbol
         }
-        fun isDouble(number: String): Boolean {
+        fun isDouble(expression: String): Boolean {
+            var number = expression
             if (number.isEmpty()) {
                 return false
             } else {
+                if (number.last() == '.') number += "0"
                 return number.toDouble() % 1 != 0.0
             }
         }
-        fun checkPoint(operations: String) {
+        fun checkPoint(operations: String) { // Allows to enter a point if the number before the sign deleted hasn't one
+            var number: String = ""
             if (hasSymbols(operations)) {
-                var number: String = ""
                 for (item in operations.reversed()) {
                     when (item) {
                         '0','1','2','3','4','5','6','7','8','9','.' -> number += item.toString()
                         '+','-','×','÷' -> break
                     }
                 }
-                point = isDouble(number.reversed())
+                pointEntered = isDouble(number.reversed())
+            } else if (!hasSymbols(operations)) {
+                pointEntered = isDouble(operations)
             }
         }
         // Numbers buttons
@@ -95,7 +98,7 @@ class MainActivity : AppCompatActivity() {
 
         btnDel.setOnClickListener { // Deletes the lasted item
             when (etOperations.text.toString().last()) { // Compares item deleted
-                '.' -> point = false
+                '.' -> pointEntered = false
                 '+', '-', '×', '÷' -> checkPoint(etOperations.text.substring(0 until etOperations.text.length - 1))
             }
             if (!etOperations.text.equals("0")) {
@@ -108,7 +111,7 @@ class MainActivity : AppCompatActivity() {
         btnDel.setOnLongClickListener { // Deletes all items
             etOperations.text = "0"
             etResult.text = ""
-            point = false
+            pointEntered = false
             true
         }
         btnPlus.setOnClickListener { printButton(btnPlus.text.toString()) }

@@ -9,13 +9,13 @@ import androidx.core.text.isDigitsOnly
 
 class MainActivity : AppCompatActivity() {
 
+    var pointEntered = false
+    var number1 = "0"; var number2 = ""; var sign = ""
+    var result: Double = 0.0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        var pointEntered = false
-        var number1: Double
-        var number2: Double
 
         val etOperations = findViewById<TextView>(R.id.etOperations)
         val etResult = findViewById<TextView>(R.id.etResult)
@@ -38,54 +38,65 @@ class MainActivity : AppCompatActivity() {
         val btn8 = findViewById<Button>(R.id.btn8)
         val btn9 = findViewById<Button>(R.id.btn9)
 
+        fun setResult() {
+            if (sign == "+") {
+                add()
+                etResult.text = result.toString()
+            }
+            if (sign == "-") {
+                subtract()
+                etResult.text = result.toString()
+            }
+        }
+
         fun printItem(x: String) {
             var input: String = x // This is needed because it can be changed, x is a constant
             val operations: String = etOperations.text.toString()
             val lastItem = etOperations.text.toString().last()
-            Toast.makeText(this,lastItem.toString(),Toast.LENGTH_SHORT).show()
             when {
                 operations == "0" && input.isDigitsOnly() -> etOperations.text = "" // Avoids multiple 0
                 input == "." && pointEntered -> input = "" // Avoids multiple points
                 input == "." && !pointEntered -> pointEntered = true // Allows to enter point again
                 input == "+" || input == "-" || input == "×" || input == "÷" -> {
+                    //number2 = number1
+                    number2 = when (result) {
+                        0.0 -> number1
+                        else -> result.toString()
+                    }
+                    number1 = "0"
+                    sign = input
                     if (lastItem == '.') input = "" else pointEntered = false
                     if (lastItem == '+' || lastItem == '-' || lastItem == '×' || lastItem == '÷') input = ""
                 }
             }
-            etOperations.text = etOperations.text.toString() + input
-        }
-        fun hasSymbols(x: String): Boolean {
-            var symbol = false
-            for (item in x) {
-                if (item == '+' || item == '-' || item == '×' || item == '÷') {
-                    symbol = true
-                    break
+            if (isNumberOrPoint(input)) if (number1 == "0") {
+                number1 = input
+            } else {
+                number1 += when (result) {
+                    0.0 -> when {
+                        hasSymbols(input) || input == "." -> input
+                        else -> (result + input.toDouble()).toString()
+                    }
+                    else -> input
                 }
             }
-            return symbol
-        }
-        fun isDouble(expression: String): Boolean {
-            var number = expression
-            if (number.isEmpty()) {
-                return false
-            } else {
-                if (number.last() == '.') number += "0"
-                return number.toDouble() % 1 != 0.0
-            }
+            setResult()
+            Toast.makeText(this,"number1: $number1, number2: $number2",Toast.LENGTH_SHORT).show()
+            etOperations.text = etOperations.text.toString() + input
         }
         fun checkPoint(operations: String) { // Allows to enter a point if the number before the sign deleted hasn't one
             var number: String = ""
             if (hasSymbols(operations)) {
                 for (item in operations.reversed()) {
-                    when (item) {
-                        '0','1','2','3','4','5','6','7','8','9','.' -> number += item.toString()
-                        '+','-','×','÷' -> break
-                    }
+                    if (isNumberOrPoint(item.toString())) number += item.toString() else break
                 }
                 pointEntered = isDouble(number.reversed())
             } else if (!hasSymbols(operations)) {
                 pointEntered = isDouble(operations)
             }
+        }
+        fun deleteLastItem(input: String): String {
+            return input.substring(0 until input.length - 1)
         }
         // Numbers buttons
         btn0.setOnClickListener { printItem(btn0.text.toString()) }
@@ -101,19 +112,25 @@ class MainActivity : AppCompatActivity() {
         // Action buttons
         btnPoint.setOnClickListener { printItem(btnPoint.text.toString()) }
 
-        btnDel.setOnClickListener { // Deletes the lasted item
+        btnDel.setOnClickListener {
             when (etOperations.text.toString().last()) { // Compares item deleted
                 '.' -> pointEntered = false
-                '+', '-', '×', '÷' -> checkPoint(etOperations.text.substring(0 until etOperations.text.length - 1))
+                '+','-','×','÷' -> checkPoint(deleteLastItem(etOperations.text.toString()))
             }
-            if (!etOperations.text.equals("0")) {
-                etOperations.text = etOperations.text.substring(0 until etOperations.text.length - 1)
+            if (!etOperations.text.equals("0")) { // Deletes the last item
+                etOperations.text = deleteLastItem(etOperations.text.toString())
+                number1 = deleteLastItem(number1)
             }
             if (etOperations.text.isEmpty()) {
                 etOperations.text = "0"
+                result = 0.0
             }
         }
         btnDel.setOnLongClickListener { // Deletes all items
+            number1 = ""
+            number2 = ""
+            result = 0.0
+            sign = ""
             etOperations.text = "0"
             etResult.text = ""
             pointEntered = false
@@ -121,7 +138,44 @@ class MainActivity : AppCompatActivity() {
         }
         btnPlus.setOnClickListener { printItem(btnPlus.text.toString()) }
         btnMinus.setOnClickListener { printItem(btnMinus.text.toString()) }
-        btnMulti.setOnClickListener { printItem(btnMulti.text.toString()) }
-        btnDivide.setOnClickListener { printItem(btnDivide.text.toString()) }
+        btnMulti.setOnClickListener { printItem("×") }
+        btnDivide.setOnClickListener { printItem("÷") }
+    }
+    private fun hasSymbols(input: String): Boolean {
+        var symbol = false
+        for (item in input) {
+            if (item == '+' || item == '-' || item == '×' || item == '÷') {
+                symbol = true
+                break
+            }
+        }
+        return symbol
+    }
+    private fun isDouble(expression: String): Boolean {
+        var number = expression
+        if (number.isEmpty()) {
+            return false
+        } else {
+            if (number.last() == '.') number += "0"
+            return number.toDouble() % 1 != 0.0
+        }
+    }
+    private fun isNumberOrPoint(item: String): Boolean {
+        return when (item) {
+            "0","1","2","3","4","5","6","7","8","9","." -> true
+            else -> false
+        }
+    }
+    private fun add() {
+        result = number2.toDouble() + number1.toDouble()
+    }
+    private fun subtract() {
+        result = number2.toDouble() - number1.toDouble()
+    }
+    private fun multiply() {
+        result = number2.toDouble() * number1.toDouble()
+    }
+    private fun divide() {
+        result = number2.toDouble() / number1.toDouble()
     }
 }

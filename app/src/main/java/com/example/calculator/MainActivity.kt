@@ -2,10 +2,12 @@ package com.example.calculator
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.text.isDigitsOnly
+import kotlin.math.round
 
 class MainActivity : AppCompatActivity() {
 
@@ -58,15 +60,17 @@ class MainActivity : AppCompatActivity() {
                 input == "." && pointEntered -> input = "" // Avoids multiple points
                 input == "." && !pointEntered -> pointEntered = true // Allows to enter point again
                 input == "+" || input == "-" || input == "×" || input == "÷" -> {
-                    //number2 = number1
-                    number2 = when (result) {
-                        0.0 -> number1
-                        else -> result.toString()
-                    }
-                    number1 = "0"
-                    sign = input
-                    if (lastItem == '.') input = "" else pointEntered = false
-                    if (lastItem == '+' || lastItem == '-' || lastItem == '×' || lastItem == '÷') input = ""
+                    if (lastItem != '.') {
+                        Log.d("hello","ENTER")
+                        number2 = when (result) {
+                            0.0 -> number1
+                            else -> result.toString()
+                        }
+                        number1 = "0"
+                        sign = input
+                        if (lastItem == '.') input = "" else pointEntered = false
+                        if (lastItem == '+' || lastItem == '-' || lastItem == '×' || lastItem == '÷') input = ""
+                    } else { input = "" }
                 }
             }
             if (isNumberOrPoint(input)) if (number1 == "0") {
@@ -75,13 +79,13 @@ class MainActivity : AppCompatActivity() {
                 number1 += when (result) {
                     0.0 -> when {
                         hasSymbols(input) || input == "." -> input
-                        else -> (result + input.toDouble()).toString()
+                        else -> delPointZero((result + input.toDouble()).toString())
                     }
                     else -> input
                 }
             }
-            setResult()
-            Toast.makeText(this,"number1: $number1, number2: $number2",Toast.LENGTH_SHORT).show()
+            if (number1.last() != '.') setResult()
+            Log.d("hello","number1: $number1, number2: $number2")
             etOperations.text = etOperations.text.toString() + input
         }
         fun checkPoint(operations: String) { // Allows to enter a point if the number before the sign deleted hasn't one
@@ -94,9 +98,6 @@ class MainActivity : AppCompatActivity() {
             } else if (!hasSymbols(operations)) {
                 pointEntered = isDouble(operations)
             }
-        }
-        fun deleteLastItem(input: String): String {
-            return input.substring(0 until input.length - 1)
         }
         // Numbers buttons
         btn0.setOnClickListener { printItem(btn0.text.toString()) }
@@ -166,16 +167,27 @@ class MainActivity : AppCompatActivity() {
             else -> false
         }
     }
+    private fun customRound(number: Double, decimals: Int): Double {
+        var multiplier = 1.0
+        repeat(decimals) { multiplier *= 10 }
+        return Math.round(number * multiplier) / multiplier
+    }
     private fun add() {
-        result = number2.toDouble() + number1.toDouble()
+        result = customRound(number2.toDouble() + number1.toDouble(), 3)
     }
     private fun subtract() {
-        result = number2.toDouble() - number1.toDouble()
+        result = customRound(number2.toDouble() - number1.toDouble(), 3)
     }
     private fun multiply() {
-        result = number2.toDouble() * number1.toDouble()
+        result = customRound(number2.toDouble() * number1.toDouble(), 3)
     }
     private fun divide() {
-        result = number2.toDouble() / number1.toDouble()
+        result = customRound(number2.toDouble() / number1.toDouble(), 3)
+    }
+    private fun delPointZero(number: String): String {
+        return number.substring(0 until number.length - 2)
+    }
+    private fun deleteLastItem(input: String): String {
+        return input.substring(0 until input.length - 1)
     }
 }

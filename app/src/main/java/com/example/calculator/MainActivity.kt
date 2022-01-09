@@ -41,14 +41,13 @@ class MainActivity : AppCompatActivity() {
         val btn9 = findViewById<Button>(R.id.btn9)
 
         fun setResult() {
-            if (sign == "+") {
-                add()
-                etResult.text = result.toString()
+            when (sign) {
+                "+" -> add()
+                "-" -> subtract()
+                "x" -> multiply()
+                "/" -> divide()
             }
-            if (sign == "-") {
-                subtract()
-                etResult.text = result.toString()
-            }
+            etResult.text = result.toString()
         }
 
         fun printItem(x: String) {
@@ -86,6 +85,11 @@ class MainActivity : AppCompatActivity() {
             }
             if (number1.last() != '.') setResult()
             Log.d("hello","number1: $number1, number2: $number2")
+            input = when (input){
+                "x" -> "×"
+                "/" -> "÷"
+                else -> input
+            }
             etOperations.text = etOperations.text.toString() + input
         }
         fun checkPoint(operations: String) { // Allows to enter a point if the number before the sign deleted hasn't one
@@ -116,7 +120,7 @@ class MainActivity : AppCompatActivity() {
         btnDel.setOnClickListener {
             when (etOperations.text.toString().last()) { // Compares item deleted
                 '.' -> pointEntered = false
-                '+','-','×','÷' -> checkPoint(deleteLastItem(etOperations.text.toString()))
+                '+','-','x','/' -> checkPoint(deleteLastItem(etOperations.text.toString()))
             }
             if (!etOperations.text.equals("0")) { // Deletes the last item
                 etOperations.text = deleteLastItem(etOperations.text.toString())
@@ -139,13 +143,13 @@ class MainActivity : AppCompatActivity() {
         }
         btnPlus.setOnClickListener { printItem(btnPlus.text.toString()) }
         btnMinus.setOnClickListener { printItem(btnMinus.text.toString()) }
-        btnMulti.setOnClickListener { printItem("×") }
-        btnDivide.setOnClickListener { printItem("÷") }
+        btnMulti.setOnClickListener { printItem("x") }
+        btnDivide.setOnClickListener { printItem("/") }
     }
     private fun hasSymbols(input: String): Boolean {
         var symbol = false
         for (item in input) {
-            if (item == '+' || item == '-' || item == '×' || item == '÷') {
+            if (item == '+' || item == '-' || item == 'x' || item == '/') {
                 symbol = true
                 break
             }

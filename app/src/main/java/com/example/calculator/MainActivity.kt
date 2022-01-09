@@ -51,15 +51,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         fun printItem(x: String) {
-            var input: String = x // This is needed because it can be changed, x is a constant
+            var input: String = changeSymbols(x) // This is needed because it can be changed, x is a constant
             val operations: String = etOperations.text.toString()
-            val lastItem = etOperations.text.toString().last()
+            val lastItem = changeSymbols(etOperations.text.toString().last().toString())
             when {
                 operations == "0" && input.isDigitsOnly() -> etOperations.text = "" // Avoids multiple 0
                 input == "." && pointEntered -> input = "" // Avoids multiple points
                 input == "." && !pointEntered -> pointEntered = true // Allows to enter point again
-                input == "+" || input == "-" || input == "×" || input == "÷" -> {
-                    if (lastItem != '.') {
+                hasSymbols(input) -> {
+                    if (lastItem != ".") {
                         Log.d("hello","ENTER")
                         number2 = when (result) {
                             0.0 -> number1
@@ -67,8 +67,8 @@ class MainActivity : AppCompatActivity() {
                         }
                         number1 = "0"
                         sign = input
-                        if (lastItem == '.') input = "" else pointEntered = false
-                        if (lastItem == '+' || lastItem == '-' || lastItem == '×' || lastItem == '÷') input = ""
+                        if (lastItem == ".") input = "" else pointEntered = false
+                        if (hasSymbols(lastItem)) input = ""
                     } else { input = "" }
                 }
             }
@@ -83,7 +83,7 @@ class MainActivity : AppCompatActivity() {
                     else -> input
                 }
             }
-            if (number1.last() != '.') setResult()
+            if (number1.last() != '.' && number1 != "0") setResult()
             Log.d("hello","number1: $number1, number2: $number2")
             input = when (input){
                 "x" -> "×"
@@ -176,22 +176,17 @@ class MainActivity : AppCompatActivity() {
         repeat(decimals) { multiplier *= 10 }
         return Math.round(number * multiplier) / multiplier
     }
-    private fun add() {
-        result = customRound(number2.toDouble() + number1.toDouble(), 3)
-    }
-    private fun subtract() {
-        result = customRound(number2.toDouble() - number1.toDouble(), 3)
-    }
-    private fun multiply() {
-        result = customRound(number2.toDouble() * number1.toDouble(), 3)
-    }
-    private fun divide() {
-        result = customRound(number2.toDouble() / number1.toDouble(), 3)
-    }
-    private fun delPointZero(number: String): String {
-        return number.substring(0 until number.length - 2)
-    }
-    private fun deleteLastItem(input: String): String {
-        return input.substring(0 until input.length - 1)
+    private fun add() { result = customRound(number2.toDouble() + number1.toDouble(), 3) }
+    private fun subtract() { result = customRound(number2.toDouble() - number1.toDouble(), 3) }
+    private fun multiply() { result = customRound(number2.toDouble() * number1.toDouble(), 3) }
+    private fun divide() { result = customRound(number2.toDouble() / number1.toDouble(), 3) }
+    private fun delPointZero(number: String): String = number.substring(0 until number.length - 2).also { return it }
+    private fun deleteLastItem(input: String): String = input.substring(0 until input.length - 1).also { return it }
+    private fun changeSymbols(symbol: String): String {
+        return when (symbol) {
+            "×" -> "x"
+            "÷" -> "/"
+            else -> symbol
+        }
     }
 }

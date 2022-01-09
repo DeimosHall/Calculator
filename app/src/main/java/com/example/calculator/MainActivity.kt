@@ -56,6 +56,7 @@ class MainActivity : AppCompatActivity() {
             val lastItem = changeSymbols(etOperations.text.toString().last().toString())
             when {
                 operations == "0" && input.isDigitsOnly() -> etOperations.text = "" // Avoids multiple 0
+                number1 == "0" && !hasSymbols(lastItem) -> input = "" // Avoids multiple 0
                 input == "." && pointEntered -> input = "" // Avoids multiple points
                 input == "." && !pointEntered -> pointEntered = true // Allows to enter point again
                 hasSymbols(input) -> {

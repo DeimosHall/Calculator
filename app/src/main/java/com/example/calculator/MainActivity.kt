@@ -41,13 +41,16 @@ class MainActivity : AppCompatActivity() {
         val btn9 = findViewById<Button>(R.id.btn9)
 
         fun setResult() {
-            when (sign) {
-                "+" -> add()
-                "-" -> subtract()
-                "x" -> multiply()
-                "/" -> divide()
+            //if (number1.last() != '.' && number1 != "0") {
+                when (sign) {
+                    "+" -> add()
+                    "-" -> subtract()
+                    "x" -> multiply()
+                    "/" -> divide()
+                //}
             }
-            etResult.text = result.toString()
+
+            if (!hasSymbols(etOperations.text.toString())) etResult.text = "" else etResult.text = result.toString()
         }
 
         fun printItem(x: String) {
@@ -56,7 +59,7 @@ class MainActivity : AppCompatActivity() {
             val lastItem = changeSymbols(etOperations.text.toString().last().toString())
             when {
                 operations == "0" && input.isDigitsOnly() -> etOperations.text = "" // Avoids multiple 0
-                number1 == "0" && !hasSymbols(lastItem) -> input = "" // Avoids multiple 0
+                number1 == "0" && !hasSymbols(lastItem) -> if (input != ".") input = "" // Avoids multiple 0
                 input == "." && pointEntered -> input = "" // Avoids multiple points
                 input == "." && !pointEntered -> pointEntered = true // Allows to enter point again
                 hasSymbols(input) -> {
@@ -74,7 +77,10 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             if (isNumberOrPoint(input)) if (number1 == "0") {
-                number1 = input
+                when(input) {
+                    "." -> number1 += input
+                    else -> number1 = input
+                }
             } else {
                 number1 += when (result) {
                     0.0 -> when {
@@ -85,7 +91,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             if (number1.last() != '.' && number1 != "0") setResult()
-            Log.d("hello","number1: $number1, number2: $number2")
+            //setResult()
+            Log.d("hello","number1: $number1, number2: $number2, point: $pointEntered")
             input = when (input){
                 "x" -> "×"
                 "/" -> "÷"
@@ -169,6 +176,12 @@ class MainActivity : AppCompatActivity() {
     private fun isNumberOrPoint(item: String): Boolean {
         return when (item) {
             "0","1","2","3","4","5","6","7","8","9","." -> true
+            else -> false
+        }
+    }
+    private fun isNumber(item: String): Boolean {
+        return when (item) {
+            "0","1","2","3","4","5","6","7","8","9" -> true
             else -> false
         }
     }

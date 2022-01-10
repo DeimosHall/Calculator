@@ -5,9 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.text.isDigitsOnly
-import kotlin.math.round
 
 class MainActivity : AppCompatActivity() {
 
@@ -40,28 +38,32 @@ class MainActivity : AppCompatActivity() {
         val btn8 = findViewById<Button>(R.id.btn8)
         val btn9 = findViewById<Button>(R.id.btn9)
 
+        fun getLastItem(): String {
+            return changeSymbol(etOperations.text.toString().last().toString())
+        }
         fun setResult() {
-            //if (number1.last() != '.' && number1 != "0") {
+            if (number1.last() != '.') {
                 when (sign) {
                     "+" -> add()
                     "-" -> subtract()
                     "x" -> multiply()
                     "/" -> divide()
-                //}
+                }
+                if (!hasSymbols(changeSymbol(etOperations.text.toString()))) etResult.text = "" else etResult.text = result.toString()
             }
-
-            if (!hasSymbols(etOperations.text.toString())) etResult.text = "" else etResult.text = result.toString()
         }
 
         fun printItem(x: String) {
-            var input: String = changeSymbols(x) // This is needed because it can be changed, x is a constant
+            var input: String = changeSymbol(x) // This is needed because it can be changed, x is a constant
             val operations: String = etOperations.text.toString()
-            val lastItem = changeSymbols(etOperations.text.toString().last().toString())
+            val lastItem = changeSymbol(etOperations.text.toString().last().toString())
             when {
                 operations == "0" && input.isDigitsOnly() -> etOperations.text = "" // Avoids multiple 0
-                number1 == "0" && !hasSymbols(lastItem) -> if (input != ".") input = "" // Avoids multiple 0
+                number1 == "0" && !hasSymbols(lastItem) -> if (input != "." && !hasSymbols(input)) input = "" // Avoids multiple 0
                 input == "." && pointEntered -> input = "" // Avoids multiple points
                 input == "." && !pointEntered -> pointEntered = true // Allows to enter point again
+            }
+            when {
                 hasSymbols(input) -> {
                     if (lastItem != ".") {
                         Log.d("hello","ENTER")
@@ -90,9 +92,8 @@ class MainActivity : AppCompatActivity() {
                     else -> input
                 }
             }
-            if (number1.last() != '.' && number1 != "0") setResult()
-            //setResult()
-            Log.d("hello","number1: $number1, number2: $number2, point: $pointEntered")
+            setResult()
+            debug()
             input = when (input){
                 "x" -> "×"
                 "/" -> "÷"
@@ -101,7 +102,7 @@ class MainActivity : AppCompatActivity() {
             etOperations.text = etOperations.text.toString() + input
         }
         fun checkPoint(operations: String) { // Allows to enter a point if the number before the sign deleted hasn't one
-            var number: String = ""
+            var number = ""
             if (hasSymbols(operations)) {
                 for (item in operations.reversed()) {
                     if (isNumberOrPoint(item.toString())) number += item.toString() else break
@@ -126,18 +127,27 @@ class MainActivity : AppCompatActivity() {
         btnPoint.setOnClickListener { printItem(btnPoint.text.toString()) }
 
         btnDel.setOnClickListener {
-            when (etOperations.text.toString().last()) { // Compares item deleted
-                '.' -> pointEntered = false
-                '+','-','x','/' -> checkPoint(deleteLastItem(etOperations.text.toString()))
+            Log.d("hello","item deleted: ${getLastItem()}")
+            when (getLastItem()) { // Compares item deleted
+                "+","-","x","/" -> {
+                    checkPoint(deleteLastItem(etOperations.text.toString()))
+                    sign = ""
+                }
+                else -> {
+                    number1 = when(number1.length) {
+                        1 -> "0"
+                        else -> deleteLastItem(number1)
+                    }
+                    if (getLastItem() == ".") pointEntered = false
+                    setResult()
+                }
             }
-            if (!etOperations.text.equals("0")) { // Deletes the last item
-                etOperations.text = deleteLastItem(etOperations.text.toString())
-                number1 = deleteLastItem(number1)
-            }
+            etOperations.text = deleteLastItem(etOperations.text.toString())
             if (etOperations.text.isEmpty()) {
                 etOperations.text = "0"
                 result = 0.0
             }
+            debug()
         }
         btnDel.setOnLongClickListener { // Deletes all items
             number1 = ""
@@ -157,12 +167,19 @@ class MainActivity : AppCompatActivity() {
     private fun hasSymbols(input: String): Boolean {
         var symbol = false
         for (item in input) {
-            if (item == '+' || item == '-' || item == 'x' || item == '/') {
+            if (item == '+' || item == '-' || item == 'x' || item == '/' || item == '×' || item == '÷') {
                 symbol = true
                 break
             }
         }
         return symbol
+    }
+    private fun changeSymbol(symbol: String): String {
+        return when (symbol) {
+            "×" -> "x"
+            "÷" -> "/"
+            else -> symbol
+        }
     }
     private fun isDouble(expression: String): Boolean {
         var number = expression
@@ -193,14 +210,16 @@ class MainActivity : AppCompatActivity() {
     private fun add() { result = customRound(number2.toDouble() + number1.toDouble(), 3) }
     private fun subtract() { result = customRound(number2.toDouble() - number1.toDouble(), 3) }
     private fun multiply() { result = customRound(number2.toDouble() * number1.toDouble(), 3) }
-    private fun divide() { result = customRound(number2.toDouble() / number1.toDouble(), 3) }
+    private fun divide() {
+        result = when(number1) {
+            "0" -> result
+            else -> customRound(number2.toDouble() / number1.toDouble(), 3)
+        }
+    }
     private fun delPointZero(number: String): String = number.substring(0 until number.length - 2).also { return it }
     private fun deleteLastItem(input: String): String = input.substring(0 until input.length - 1).also { return it }
-    private fun changeSymbols(symbol: String): String {
-        return when (symbol) {
-            "×" -> "x"
-            "÷" -> "/"
-            else -> symbol
-        }
+
+    private fun debug() {
+        Log.d("hello","number1: $number1 number2: $number2 result: $result point: $pointEntered sign: $sign")
     }
 }

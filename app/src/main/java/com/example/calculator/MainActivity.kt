@@ -11,6 +11,7 @@ class MainActivity : AppCompatActivity() {
 
     var pointEntered = false
     var number1 = "0"; var number2 = ""; var sign = ""
+    private val numHistory = mutableListOf("0"); var index = 0
     var result: Double = 0.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -93,6 +94,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             setResult()
+            addToHistory(input)
             debug()
             input = when (input){
                 "x" -> "×"
@@ -142,6 +144,7 @@ class MainActivity : AppCompatActivity() {
                     setResult()
                 }
             }
+            removeFromHistory(getLastItem())
             etOperations.text = deleteLastItem(etOperations.text.toString())
             if (etOperations.text.isEmpty()) {
                 etOperations.text = "0"
@@ -157,6 +160,10 @@ class MainActivity : AppCompatActivity() {
             etOperations.text = "0"
             etResult.text = ""
             pointEntered = false
+            numHistory.clear()
+            numHistory.add("0")
+            index = 0
+            debug()
             true
         }
         btnPlus.setOnClickListener { printItem(btnPlus.text.toString()) }
@@ -196,12 +203,6 @@ class MainActivity : AppCompatActivity() {
             else -> false
         }
     }
-    private fun isNumber(item: String): Boolean {
-        return when (item) {
-            "0","1","2","3","4","5","6","7","8","9" -> true
-            else -> false
-        }
-    }
     private fun customRound(number: Double, decimals: Int): Double {
         var multiplier = 1.0
         repeat(decimals) { multiplier *= 10 }
@@ -220,6 +221,41 @@ class MainActivity : AppCompatActivity() {
     private fun deleteLastItem(input: String): String = input.substring(0 until input.length - 1).also { return it }
 
     private fun debug() {
-        Log.d("hello","number1: $number1 number2: $number2 result: $result point: $pointEntered sign: $sign")
+        Log.d("hello","number1: $number1 number2: $number2 result: $result index: $index point: $pointEntered sign: $sign")
+        Log.d("hello",numHistory.toString())
+    }
+    private fun addToHistory(input: String) {
+        when {
+            hasSymbols(input) -> {
+                numHistory.add(input)
+                numHistory.add("")
+                index += 2
+            }
+            numHistory[index] == "0" -> {
+                numHistory[index] = input
+            }
+            else -> {
+                numHistory[index] = numHistory[index] + input
+            }
+        }
+    }
+    private fun removeFromHistory(input: String) {
+        when {
+            index == 0 && input == numHistory.last() -> {
+                numHistory[index] = "0"
+            }
+            input == numHistory.last() -> {
+                numHistory.removeLast()
+                index--
+            }
+            input != numHistory.last() -> {
+                numHistory[index] = deleteLastItem(numHistory[index])
+            }
+            input == "all" -> {
+                numHistory.clear()
+                numHistory.add("0")
+                index = 0
+            }
+        }
     }
 }

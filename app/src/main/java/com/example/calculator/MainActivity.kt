@@ -12,6 +12,7 @@ class MainActivity : AppCompatActivity() {
     var pointEntered = false
     var number1 = "0"; var number2 = ""; var sign = ""
     private val numHistory = mutableListOf("0"); var index = 0
+    private val resultHistory = mutableListOf(""); var resultIndex = 0
     var result: Double = 0.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,6 +51,7 @@ class MainActivity : AppCompatActivity() {
                     "x" -> multiply()
                     "/" -> divide()
                 }
+                addToResultHistory()
                 if (!hasSymbols(changeSymbol(etOperations.text.toString()))) etResult.text = "" else etResult.text = result.toString()
             }
         }
@@ -68,6 +70,8 @@ class MainActivity : AppCompatActivity() {
                 hasSymbols(input) -> {
                     if (lastItem != ".") {
                         Log.d("hello","ENTER")
+                        resultIndex++
+                        resultHistory.add("")
                         number2 = when (result) {
                             0.0 -> number1
                             else -> result.toString()
@@ -223,6 +227,7 @@ class MainActivity : AppCompatActivity() {
     private fun debug() {
         Log.d("hello","number1: $number1 number2: $number2 result: $result index: $index point: $pointEntered sign: $sign")
         Log.d("hello",numHistory.toString())
+        Log.d("hello",resultHistory.toString())
     }
     private fun addToHistory(input: String) {
         when {
@@ -245,6 +250,7 @@ class MainActivity : AppCompatActivity() {
                 numHistory[index] = "0"
             }
             input == numHistory.last() -> {
+                if (hasSymbols(input)) removeFromResultHistory()
                 numHistory.removeLast()
                 index--
             }
@@ -257,5 +263,12 @@ class MainActivity : AppCompatActivity() {
                 index = 0
             }
         }
+    }
+    private fun addToResultHistory() {
+        resultHistory[resultIndex] = result.toString()
+    }
+    private fun removeFromResultHistory() {
+        resultHistory.removeLast()
+        resultIndex--
     }
 }

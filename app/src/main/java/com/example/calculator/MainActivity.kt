@@ -250,9 +250,9 @@ class MainActivity : AppCompatActivity() {
                 numHistory[index] = "0"
             }
             input == numHistory.last() -> {
-                if (hasSymbols(input)) removeFromResultHistory()
                 numHistory.removeLast()
                 index--
+                if (hasSymbols(input)) removeFromResultHistory()
             }
             input != numHistory.last() -> {
                 numHistory[index] = deleteLastItem(numHistory[index])
@@ -268,6 +268,18 @@ class MainActivity : AppCompatActivity() {
         resultHistory[resultIndex] = result.toString()
     }
     private fun removeFromResultHistory() {
+        when (index) {
+            1 -> {
+                number1 = numHistory[0]
+                number2 = "0"
+                sign = ""
+            }
+            else -> {
+                number1 = numHistory[index]
+                sign = numHistory[index - 1]
+                number2 = numHistory[index - 2]
+            }
+        }
         resultHistory.removeLast()
         resultIndex--
     }
